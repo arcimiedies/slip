@@ -1,0 +1,259 @@
+<html>
+
+    <head>
+
+        <meta charset="utf-8">
+
+        <title>SlipWays</title>
+
+
+        <script src="zepto.min.js"></script>
+<style type="text/css">
+
+
+
+html,body {
+
+	margin: 0;
+
+	font: 16px Helvetica, Arial, sans-serif;
+
+	background: #222;
+
+}
+
+canvas#canvas {
+
+  /*width: 512px; height: 512px;
+*/
+  height: 100%; width: auto;
+  cursor: none;
+  image-rendering: optimizeSpeed;
+
+  image-rendering: -moz-crisp-edges;
+
+  image-rendering: -webkit-optimize-contrast;
+
+  image-rendering: optimize-contrast;
+
+  image-rendering: pixelated;
+
+  image-rendering: crisp-edges;
+
+  -ms-interpolation-mode: nearest-neighbor;
+
+}
+
+.game {
+
+  margin: 0 auto;
+  width: 512px;
+
+  height: 512px;
+  padding: 14px;
+
+  background: #000;
+
+  position: relative;
+}
+
+.blackout {
+  position: absolute;
+  top: 14px; left: 14px;
+  background: black;
+  width: 512px; height: 512px;
+  z-index: 1;
+}
+.splash {
+  display: block;
+  position: absolute;
+  top: 14px; left: 14px;
+  z-index: 2;
+  opacity: 0;
+}
+.game.fullscreen {
+  height: 100% !important;
+  width: auto !important;
+  padding: 0;
+}
+.fullscreen canvas {
+  display: block;
+  margin: 0 auto;
+}
+.btns {
+
+  margin: 1px auto 0;
+	display: flex;
+
+  width: 540px;
+}
+
+.btns .spacer {
+
+	flex-grow: 1;
+
+	background: black;
+
+}
+
+.btns a {
+
+	display: block;
+
+	box-sizing: border-box;
+
+	background: #000;
+
+	color: #666;
+
+	flex-grow: 0;
+
+	text-align: center;
+
+	margin: 0 0 0 1px;
+
+	vertical-align: middle;
+
+	min-width: 30px;
+
+	height: 30px;
+
+	padding: 9px 5px 0px;
+	text-decoration: none;
+
+	transition: all 0.2s ease-out;
+
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none;
+}
+
+.btns a:hover {
+
+	background:#224;
+
+}
+
+.btns a .label {
+  padding-left: 5px;
+  position: relative;
+  top: -1px;
+  text-shadow: 1px 1px black;
+}
+</style>
+
+</head>
+
+
+
+<body onload="window.focus()">
+
+    <div id="game-container" class="game">
+
+		  <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+      <div class="blackout"></div>
+      <img class="splash" width="512" height="512" src="coolmath-splashscreen.png">
+    </div>
+
+		<script type="text/javascript">
+
+      var pico8_gpio = new Array(128);
+      for (var i = 0; i < 128; i++)
+        pico8_gpio[i] = 0;
+			var canvas = document.getElementById("canvas");
+
+			canvas.width = window.innerWidth;
+
+			canvas.height = window.innerHeight;
+
+
+			var Module = {
+
+				arguments: ["-width","512","-height","512"],
+
+			};
+
+			Module.canvas = canvas;
+
+    </script>
+    <script>
+      $(document).on("webkitfullscreenchange mozfullscreenchange msfullscreenchange fullscreenchange", function(event) {
+        var fullscreenOn = document.fullscreenElement || document.mozFullScreenElement || document.webkitIsFullScreen || document.msFullscreenElement;
+        var container = document.getElementById("game-container");
+        $("#game-container").toggleClass('fullscreen', fullscreenOn);
+      });
+
+      function toggleFullscreen()
+      {
+        var frame = document.getElementById("game-container");
+        if (document.fullscreenElement || document.mozFullScreenElement || document.webkitIsFullScreen || document.msFullscreenElement)
+        {//exit fs
+          frame.cancelFullscreen = frame.cancelFullscreen || frame.mozCancelFullScreen || frame.webkitCancelFullScreen;
+          frame.cancelFullscreen();
+        }
+        else
+        {//enter fs
+          frame.requestFullscreen = frame.requestFullscreen || frame.mozRequestFullScreen || frame.webkitRequestFullScreen;
+          frame.requestFullscreen();
+        }
+      }
+    </script>
+    <script>
+      // getting help from within PICO-8
+      var hoverD = 0;
+      function check() {
+        hoverD += (pico8_gpio[0] > 0) ? 1 : -1;
+        if (hoverD < 0) hoverD = 0;
+        if (hoverD > 10) hoverD = 10;
+      }
+      setInterval(check, 30);
+      document.getElementById("canvas").addEventListener('click',
+        function(evt) {
+          // PICO-8 sets GPIO when buttons are hovered
+          // and slowly ticks it down to let us always catch it
+          if (hoverD > 5)
+            window.open("https://slipways.net/quickstart/", "_blank");
+        }
+      );
+    </script>
+		<script>
+
+			function onKeyDown_blocker(event) {
+
+				event = event || window.event;
+
+				var o = document.activeElement;
+
+				if (!o || o == document.body || o.tagName == "canvas")
+
+				{
+
+					if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1)
+
+					{
+
+						if (event.preventDefault) event.preventDefault();
+
+					}
+
+				}
+
+			}
+
+			document.addEventListener('keydown', onKeyDown_blocker, false);
+
+		</script>
+
+    <script src="coolmath.js"></script>
+	</div>
+
+</body>
+
+</html>
+
